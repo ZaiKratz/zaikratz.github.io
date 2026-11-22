@@ -92,7 +92,7 @@
 
       <article class="project feature">
         <div class="project-media video-thumb floralis">
-          <a href="https://youtu.be/RKwkn0pn72w?si=eSyN-JAQKRnCeSmC" target="_blank" rel="noreferrer"><span>Watch Floralis gameplay ↗</span></a>
+          <a href="https://youtu.be/RKwkn0pn72w?si=eSyN-JAQKRnCeSmC" target="_blank" rel="noreferrer"><span>Watch Floralis video ↗</span></a>
         </div>
         <div class="project-body">
           <div class="project-topline"><span>03</span><span>SolidCore Games</span></div>
@@ -186,12 +186,12 @@
         <h2>Core areas I work in.</h2>
       </div>
       <div class="cards expertise-grid">
-        <article class="card"><h3>Unreal Engine</h3><p>C++ · Blueprints · Gameplay Framework · Networking · Replication · AI · UI · Profiling · Asset Management</p></article>
-        <article class="card"><h3>Gameplay</h3><p>Gameplay architecture · Character systems · Game modes · Matchmaking · Progression · Gameplay gadgets</p></article>
-        <article class="card"><h3>Networking & Backend</h3><p>Client-server architecture · Party systems · Friends · Matchmaking · AWS · GameLift · PlayFab · gRPC</p></article>
-        <article class="card"><h3>Performance</h3><p>Profiling · Debugging · Asset loading · Level loading · FPS / hitch reduction · Performance optimization</p></article>
-        <article class="card"><h3>UI Engineering</h3><p>Player-facing UI · Grid navigation · Seasonal UI · Customization · UI/gameplay/backend integration</p></article>
-        <article class="card"><h3>Leadership</h3><p>Technical leadership · Mentoring · Task distribution · Architecture decisions · Team coordination</p></article>
+        <article class="card"><h3>Unreal Engine</h3><p>C++ · Blueprints · Gameplay Framework · Editor tools · Cross-platform development</p></article>
+        <article class="card"><h3>Gameplay</h3><p>Gameplay architecture · Character systems · Combat systems · AI · Game modes · Progression · Save systems</p></article>
+        <article class="card"><h3>Networking & Backend</h3><p>Replication · RPCs · State synchronization · Client-server architecture · AWS · PlayFab · gRPC</p></article>
+        <article class="card"><h3>Performance & Resources</h3><p>Profiling · Debugging · Asset management · Level management · Loading optimization · Hitch reduction</p></article>
+        <article class="card"><h3>UI Engineering</h3><p>Player-facing UI · UI navigation · Customization · UI/gameplay/backend integration</p></article>
+        <article class="card"><h3>Leadership</h3><p>System architecture · Mentoring · Task planning · Technical decisions · Team coordination</p></article>
       </div>
     </section>
 
@@ -213,6 +213,35 @@
   </main>
 
   <footer><span>© <span id="year"></span> Anatolii Sadovnychyi</span><span>Portfolio</span></footer>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Keep projects visible by default, including without JavaScript or observer support.
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const projectObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const project = entry.target;
+          projectObserver.unobserve(project);
+          project.classList.add('is-visible');
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+
+      const projects = document.querySelectorAll('#projects .project, #experience .card');
+      projects.forEach((project) => {
+        project.classList.add('project-reveal');
+        project.addEventListener('focusin', () => {
+          project.classList.add('is-visible');
+          projectObserver.unobserve(project);
+        }, { once: true });
+      });
+
+      // Paint the transparent starting state before revealing projects in view.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        projects.forEach((project) => projectObserver.observe(project));
+      }));
+    }
+  </script>
 </body>
 </html>
