@@ -82,6 +82,8 @@
   let previousTime = null;
   let elapsed = 14;
   let lost = false;
+  let scrolling = false;
+  let scrollTimer = 0;
 
   function compile(type, source) {
     const shader = gl.createShader(type);
@@ -134,9 +136,12 @@
     // Cap rendering resolution; the soft mist scales smoothly to any screen.
     const width = Math.max(1, layer.clientWidth);
     const height = Math.max(1, layer.clientHeight);
-    const scale = Math.min(0.8, Math.sqrt(500000 / (width * height)));
-    canvas.width = Math.max(1, Math.round(width * scale));
-    canvas.height = Math.max(1, Math.round(height * scale));
+    const scale = Math.min(0.5, Math.sqrt(180000 / (width * height)));
+    const renderWidth = Math.max(1, Math.round(width * scale));
+    const renderHeight = Math.max(1, Math.round(height * scale));
+    if (canvas.width === renderWidth && canvas.height === renderHeight) return;
+    canvas.width = renderWidth;
+    canvas.height = renderHeight;
     if (program && !lost) draw();
   }
 
@@ -144,7 +149,7 @@
     frame = requestAnimationFrame(animate);
     if (previousTime === null) previousTime = timestamp;
     const delta = timestamp - previousTime;
-    if (delta < 1000 / 30) return;
+    if (delta < 1000 / 20) return;
     elapsed += Math.min(delta, 100) / 1000;
     previousTime = timestamp;
     draw();
@@ -153,9 +158,23 @@
   function updateMotion() {
     cancelAnimationFrame(frame);
     previousTime = null;
-    if (!program || lost || document.hidden) return;
+    if (!program || lost || document.hidden || scrolling) return;
     draw();
     if (!motion.matches) frame = requestAnimationFrame(animate);
+  }
+
+  // Keep the last mist frame on screen and leave rendering time for scrolling.
+  function onScroll() {
+    if (!scrolling) {
+      scrolling = true;
+      cancelAnimationFrame(frame);
+      previousTime = null;
+    }
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      scrolling = false;
+      updateMotion();
+    }, 160);
   }
 
   canvas.addEventListener('webglcontextlost', event => {
@@ -174,6 +193,7 @@
 
   if (!initialize()) return;
   window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', updateMotion);
   motion.addEventListener('change', updateMotion);
   resize();

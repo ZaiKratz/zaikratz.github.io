@@ -218,7 +218,7 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Keep projects visible by default, including without JavaScript or observer support.
+    // Keep cards visible by default, including without JavaScript or observer support.
     if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const projectObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -230,7 +230,7 @@
         });
       }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
 
-      const projects = document.querySelectorAll('#projects .project, #experience .card');
+      const projects = document.querySelectorAll('#projects .project, #experience .card, #expertise .card');
       projects.forEach((project) => {
         project.classList.add('project-reveal');
         project.addEventListener('focusin', () => {
